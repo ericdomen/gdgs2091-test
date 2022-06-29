@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import dao from "../dao/authDAO";
+import dao from "../dao/authDao";
 import jwt from 'jsonwebtoken';
 import keySecret from "../config/keySecret";
 import validator from 'validator';
