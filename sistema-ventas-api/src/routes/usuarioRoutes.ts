@@ -13,9 +13,9 @@ class UsuarioRoutes {
 
     private config() {
         // listado
-        this.router.get('/', [checkJwt], usuarioController.listar);
+        this.router.get('/', usuarioController.listar);
         // insercion
-        this.router.post('/', [checkJwt], usuarioController.insertar);
+        this.router.post('/', usuarioController.insertar);
         // actualizar
         this.router.put('/', [checkJwt], usuarioController.actualizar);
         // eliminar

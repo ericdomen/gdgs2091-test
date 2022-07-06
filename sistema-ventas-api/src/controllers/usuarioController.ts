@@ -1,21 +1,157 @@
 import { Request, Response } from "express";
+import dao from '../dao/usuarioDAO';
+import validator from 'validator';
+import criptjs from 'crypto-js';
+import keySecret from "../config/keySecret";
 
 class UsuarioController {
 
-    public listar(req: Request, res: Response) {
-        res.json({ message : "Listar"});
+    /**
+     * @description Lista los usuarios disponibles
+     * @param req 
+     * @param res 
+     * @returns Promise<Response<any, Record<string, any>> | undefined>
+     */
+     public async listar(req: Request, res: Response) {
+        try {
+
+            const result = await dao.listar();
+
+            res.json(result);
+        } catch (error: any) {
+            return res.status(500).json({ message : `${error.message}` });
+        }
     }
 
-    public insertar(req: Request, res: Response) {
-        res.json({ message : "Insertar"});
+    /**
+     *  @description Inserción de usuarios a la bd
+     * @param req 
+     * @param res 
+     * @returns Promise<Response<any, Record<string, any>> | undefined>
+     */
+    public async insertar(req: Request, res: Response) {
+        try {
+            // se obtienen los datos del body
+            var usuario = req.body;
+
+            // validar que los datos no sean nulos o indefinidos
+            if (!usuario.nombre
+                || !usuario.apellidos
+                || !usuario.username
+                || !usuario.password
+                || !usuario.email
+                || !usuario.cveRol) {
+                    return res.status(404).json({ message: "Todos los datos son requeridos", code: 1});
+            }
+
+            // se verifica que los datos no se encuentren vacios
+            if (validator.isEmpty(usuario.nombre.trim())
+                || validator.isEmpty(usuario.apellidos.trim())
+                || validator.isEmpty(usuario.username.trim())
+                || validator.isEmpty(usuario.password.trim())
+                || validator.isEmail(usuario.email.trim())
+                || validator.isEmpty(usuario.cveRol.trim())) {
+                    return res.status(404).json({ message: "Todos los datos son requeridos", code: 1});
+            }
+
+            // encriptar nuestra contraseña
+            var encryptedText = criptjs.AES.encrypt(usuario.password, keySecret.keys.secret).toString();
+            usuario.password = encryptedText;
+
+            const newUser = {
+                nombre: usuario.nombre.trim(),
+                apellidos: usuario.apellidos.trim(),
+                username: usuario.username.trim(),
+                password: usuario.password.trim(),
+                email: usuario.email.trim(),
+                cveRol: usuario.cveRol.trim()
+            }
+
+            // inserción de los datos
+            const result = await dao.insertar(newUser);
+
+            if (result.affectedRows > 0) {
+                return res.json({message: "Los datos se guardaron correctamente", code: 0});
+            } else {
+                return res.status(404).json({ message: result.message, code: 1});
+            }
+
+        } catch (error: any) {
+            return res.status(500).json({ message : `${error.message}` });
+        }
     }
 
-    public actualizar(req: Request, res: Response) {
-        res.json({ message : "Actualizar"});
+    public async actualizar(req: Request, res: Response) {
+        try {
+            // se obtienen los datos del body
+            var usuario = req.body;
+
+            // validar que los datos no sean nulos o indefinidos
+            if (!usuario.cveUsuario
+                || !usuario.nombre
+                || !usuario.apellidos
+                || !usuario.email
+                || !usuario.cveRol) {
+                    return res.status(404).json({ message: "Todos los datos son requeridos", code: 1});
+            }
+
+            // se verifica que los datos no se encuentren vacios
+            if (validator.isEmpty(usuario.cveUsuario.trim())
+                || validator.isEmpty(usuario.nombre.trim())
+                || validator.isEmpty(usuario.apellidos.trim())
+                || validator.isEmail(usuario.email.trim())
+                || validator.isEmpty(usuario.cveRol.trim())) {
+                    return res.status(404).json({ message: "Todos los datos son requeridos", code: 1});
+            }
+
+            const newUser = {
+                nombre: usuario.nombre.trim(),
+                apellidos: usuario.apellidos.trim(),
+                email: usuario.email.trim(),
+                cveRol: usuario.cveRol.trim()
+            }
+
+            // actualización de los datos
+            const result = await dao.actualizar(newUser, usuario.cveUsuario);
+
+            if (result.affectedRows > 0) {
+                return res.json({message: "Los datos se actualizaron correctamente", code: 0});
+            } else {
+                return res.status(404).json({ message: result.message, code: 1});
+            }
+
+        } catch (error: any) {
+            return res.status(500).json({ message : `${error.message}` });
+        }
     }
 
-    public eliminar(req: Request, res: Response) {
-        res.json({ message : "Eliminar"});
+    public async eliminar(req: Request, res: Response) {
+        try {
+            // se obtienen los datos del body
+            var usuario = req.body;
+
+            // validar que los datos no sean nulos o indefinidos
+            if (!usuario.cveUsuario) {
+                    return res.status(404).json({ message: "Todos los datos son requeridos", code: 1});
+            }
+
+            // se verifica que los datos no se encuentren vacios
+            if (validator.isEmpty(usuario.cveUsuario.trim())) {
+                    return res.status(404).json({ message: "Todos los datos son requeridos", code: 1});
+            }
+
+            // actualización de los datos
+            const result = await dao.eliminar(usuario.cveUsuario);
+
+            if (result.affectedRows > 0) {
+                return res.json({message: "Los datos se eliminaron correctamente", code: 0});
+            } else {
+                return res.status(404).json({ message: result.message, code: 1});
+            }
+
+        } catch (error: any) {
+            return res.status(500).json({ message : `${error.message}` });
+        }
     }
 
 }
