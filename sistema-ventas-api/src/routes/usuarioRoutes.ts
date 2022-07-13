@@ -19,7 +19,7 @@ class UsuarioRoutes {
         // actualizar
         this.router.put('/', usuarioController.actualizar);
         // eliminar
-        this.router.delete('/', usuarioController.eliminar);
+        this.router.delete('/:cveUsuario', usuarioController.eliminar);
     }
 }
 const usuarioRoutes = new UsuarioRoutes();
