@@ -3,6 +3,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes';
 import usuarioRoutes from './routes/usuarioRoutes';
+import generalRoutes from './routes/generalRoutes';
 
 class Server {
     public app: Application;
@@ -31,6 +32,7 @@ class Server {
     routes(): void {
         this.app.use("/api/auth", authRoutes);
         this.app.use("/api/users", usuarioRoutes);
+        this.app.use("/api/general", generalRoutes);
     }
 
     start(): void {
