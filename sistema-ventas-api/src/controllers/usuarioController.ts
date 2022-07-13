@@ -12,7 +12,7 @@ class UsuarioController {
      * @param res 
      * @returns Promise<Response<any, Record<string, any>> | undefined>
      */
-     public async listar(req: Request, res: Response) {
+    public async listar(req: Request, res: Response) {
         try {
 
             const result = await dao.listar();
@@ -49,8 +49,7 @@ class UsuarioController {
                 || validator.isEmpty(usuario.apellidos.trim())
                 || validator.isEmpty(usuario.username.trim())
                 || validator.isEmpty(usuario.password.trim())
-                || validator.isEmail(usuario.email.trim())
-                || validator.isEmpty(usuario.cveRol.trim())) {
+                || usuario.cveRol <= 0) {
                     return res.status(404).json({ message: "Todos los datos son requeridos", code: 1});
             }
 
@@ -58,14 +57,17 @@ class UsuarioController {
             var encryptedText = criptjs.AES.encrypt(usuario.password, keySecret.keys.secret).toString();
             usuario.password = encryptedText;
 
+            
             const newUser = {
                 nombre: usuario.nombre.trim(),
                 apellidos: usuario.apellidos.trim(),
                 username: usuario.username.trim(),
                 password: usuario.password.trim(),
                 email: usuario.email.trim(),
-                cveRol: usuario.cveRol.trim()
+                cveRol: usuario.cveRol
             }
+
+            console.log(newUser);
 
             // inserción de los datos
             const result = await dao.insertar(newUser);
@@ -96,11 +98,11 @@ class UsuarioController {
             }
 
             // se verifica que los datos no se encuentren vacios
-            if (validator.isEmpty(usuario.cveUsuario.trim())
+            if (usuario.cveUsuario <= 0
                 || validator.isEmpty(usuario.nombre.trim())
                 || validator.isEmpty(usuario.apellidos.trim())
-                || validator.isEmail(usuario.email.trim())
-                || validator.isEmpty(usuario.cveRol.trim())) {
+                || validator.isEmpty(usuario.email.trim())
+                || usuario.cveRol <= 0) {
                     return res.status(404).json({ message: "Todos los datos son requeridos", code: 1});
             }
 
@@ -108,7 +110,7 @@ class UsuarioController {
                 nombre: usuario.nombre.trim(),
                 apellidos: usuario.apellidos.trim(),
                 email: usuario.email.trim(),
-                cveRol: usuario.cveRol.trim()
+                cveRol: usuario.cveRol
             }
 
             // actualización de los datos
@@ -128,20 +130,20 @@ class UsuarioController {
     public async eliminar(req: Request, res: Response) {
         try {
             // se obtienen los datos del body
-            var usuario = req.body;
+            var { cveUsuario } = req.params;
 
             // validar que los datos no sean nulos o indefinidos
-            if (!usuario.cveUsuario) {
+            if (!cveUsuario) {
                     return res.status(404).json({ message: "Todos los datos son requeridos", code: 1});
             }
 
             // se verifica que los datos no se encuentren vacios
-            if (validator.isEmpty(usuario.cveUsuario.trim())) {
+            if (validator.isEmpty(cveUsuario.trim())) {
                     return res.status(404).json({ message: "Todos los datos son requeridos", code: 1});
             }
 
             // actualización de los datos
-            const result = await dao.eliminar(usuario.cveUsuario);
+            const result = await dao.eliminar(parseInt(cveUsuario));
 
             if (result.affectedRows > 0) {
                 return res.json({message: "Los datos se eliminaron correctamente", code: 0});

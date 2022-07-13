@@ -17,9 +17,9 @@ class UsuarioRoutes {
         // insercion
         this.router.post('/', usuarioController.insertar);
         // actualizar
-        this.router.put('/', [checkJwt], usuarioController.actualizar);
+        this.router.put('/', usuarioController.actualizar);
         // eliminar
-        this.router.delete('/', [checkJwt], usuarioController.eliminar);
+        this.router.delete('/', usuarioController.eliminar);
     }
 }
 const usuarioRoutes = new UsuarioRoutes();
